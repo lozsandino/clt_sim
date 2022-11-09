@@ -86,10 +86,20 @@ ggConv <- function(x, realParam, var = FALSE) {
   # then it plots the mean.
   
   # Set up
-  n <- min(1000, length(x))
+  n <- length(x)
+  
+  if (n > 1000) {
+    # To decrease the dimension, while maintaining the objective of the plot.
+    index <- sample(30:n, 1000, replace = FALSE)
+    index <- index[order(index)]
+  } else {
+    index <- 30:n
+  }
+  
   est <- c()
   
-  for (k in 30:n) {
+  
+  for (k in index) {
     # randomly select k observations and estimate the average.
     if (var) {
       est <- c(est, var(sample(x, k)))
@@ -104,14 +114,18 @@ ggConv <- function(x, realParam, var = FALSE) {
   # Plot
   p <- ggplot() +
     geom_line(
-      aes(x = 30:n, y = est, color = "estim")
+      aes(
+        x = 2 * index, # to present the total size of the sample.
+        y = est, 
+        color = "estim"
+      )
     ) +
     geom_hline(
       aes(yintercept = realParam, color = "real"),
       alpha = 0.6,
       linewidth = 1.2
     ) +
-    xlab("n") +
+    xlab(expression("k")) +
     ylab("mean difference") +
     scale_color_manual(
       name = "",

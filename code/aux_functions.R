@@ -4,6 +4,23 @@ dSeq <- function(x) {
   return(res)
 }
 
+getMDD <- function(sd, nX, isNorm = TRUE) {
+  # Estimates the minimum detectable difference.
+  # sd: standard deviation of the sample difference
+  # n: size of sample X (nY = nX)
+  
+  sig <- 0.05 # statistical significance
+  pow <- 0.8 # statistical power
+  
+  if (isNorm) {
+    res <- (qnorm(1 - sig/2) + qnorm((1 - pow), lower.tail = FALSE)) * sd * sqrt(2/(nX - 1))
+  } else {
+    res <- (qt(1 - sig/2, df = nX - 1) + qt((1 - pow), df = nX - 1, lower.tail = FALSE)) * sd * sqrt(2/(nX - 1))
+  }
+  
+  return(res)
+}
+
 randomAvgDiff <- function(seed, x, y) {
   # Estimates the average difference of re-sampled x and y.
   
@@ -160,6 +177,102 @@ ggNorm <- function(x) {
     ggtitle("Normal QQ Plot") +
     theme(
       plot.title = element_text(hjust = 0.5), 
+      text = element_text(size = 14, family = "serif", color = "#3b3b3b"),
+      plot.background = element_rect(fill = "#e0e0e0", color = "#e0e0e0"),
+      legend.background = element_rect(fill = "#e0e0e0", color = "#e0e0e0")
+    )
+  
+  return(p)
+}
+
+ggMDD <- function(x, y, boots) {
+  # Plots the densities representing the minimum detectable difference.
+  
+  # Set up
+  sig <- 0.05
+  pow <- 0.8
+  
+  nX <- length(x)
+  sdX <- sd(x)
+  sdY <- sd(y)
+  sd <- sqrt(sdX^2 + sdY^2)
+  mdd <- getMDD(sd, nX)
+  hvals <- dSeq(c(dSeq(boots) - mdd - 2 * sd * sqrt(2/(nX - 1)), dSeq(boots) + mdd + 2 * sd * sqrt(2/(nX - 1))))
+  
+  # Densities
+  densNull <- dnorm(hvals, sd = sd * sqrt(2/(nX - 1)))
+  densAlt <- dnorm(hvals, mean = mdd, sd = sd * sqrt(2/(nX - 1)))
+  criticalValue <- qnorm(1 - sig/2, sd = sd * sqrt(2/(nX - 1)))
+  
+  p <- ggplot() +
+    geom_line(
+      aes(
+        x = hvals,
+        y = densAlt,
+        color = "alt"
+      ),
+      linewidth = 1.2
+    ) +
+    geom_area(
+      aes(
+        x = ifelse(hvals >= criticalValue, hvals, NA),
+        y = densAlt
+      ),
+      fill = "#702963",
+      alpha = 0.3
+    ) +
+    geom_vline(
+      aes(
+        xintercept = mdd,
+        color = "alt"
+      ),
+      linetype = "dashed", 
+      linewidth = 1.2
+    ) +
+    geom_line(
+      aes(
+        x = hvals,
+        y = densNull,
+        color = "nul"
+      ),
+      linewidth = 1.2
+    ) + 
+    geom_area(
+      aes(
+        x = ifelse(hvals >= criticalValue, hvals, NA),
+        y = densNull
+      ),
+      fill = "#CD7F32",
+      alpha = 0.3
+    ) +
+    geom_area(
+      aes(
+        x = ifelse(hvals <= -criticalValue, hvals, NA),
+        y = densNull
+      ),
+      fill = "#CD7F32",
+      alpha = 0.3
+    ) +
+    geom_vline(
+      aes(
+        xintercept = 0,
+        color = "nul"
+      ),
+      linetype = "dashed", 
+      linewidth = 1.2
+    ) +
+    xlab("") +
+    xlim(min(hvals), max(hvals)) +
+    ylab("density") +
+    scale_color_manual(
+      name = "",
+      values = c(alt = "#702963", nul = "#CD7F32"), 
+      labels = c(
+        "mdd",
+        expression(paste(mu, "= 0"))
+      )
+    ) +
+    theme(
       text = element_text(size = 14, family = "serif", color = "#3b3b3b"),
       plot.background = element_rect(fill = "#e0e0e0", color = "#e0e0e0"),
       legend.background = element_rect(fill = "#e0e0e0", color = "#e0e0e0")

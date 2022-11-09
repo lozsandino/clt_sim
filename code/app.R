@@ -171,6 +171,11 @@ ui <- fluidPage(
         tabPanel(
           "Bootstrap", 
           plotOutput("boots")
+        ),
+        tabPanel(
+          "Minimum Detectable Difference",
+          uiOutput("estMDD"),
+          plotOutput("plotMDD")
         )
       )
     )
@@ -240,6 +245,9 @@ server <- function(input, output, session) {
       # Bootstrap average difference:
       boots <- bootsAvgDiff(x, y, 1000)
       densBoots <- dnorm(dSeq(boots), mean(boots), sd(boots))
+      
+      # minimum detectable difference
+      mdd <- getMDD(sqrt(realDiffVar), n)
       
       # ---- Plots ----
       ## histograms:
@@ -312,6 +320,19 @@ server <- function(input, output, session) {
           paste(
             "$$\\bar{X} - \\bar{Y} =", round(mean(x) - mean(y), digits = 2),"; \\quad", 
             "{s^2}_{X-Y} =", round(var(x) + var(y), digits = 2), "$$"
+          )
+        )
+      })
+      
+      # minimum detectable difference
+      output$plotMDD <- renderPlot({
+        ggMDD(x, y, boots)
+      })
+      
+      output$estMDD <- renderUI({
+        withMathJax(
+          paste(
+            "$$mdd =", round(mdd, digits = 2), "$$"
           )
         )
       })

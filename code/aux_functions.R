@@ -42,6 +42,15 @@ bootsAvgDiff <- function(x, y, iter) {
   return(res)
 }
 
+ggTheme <- function() {
+  theme(
+    plot.title = element_text(hjust = 0.5), 
+    text = element_text(size = 14, family = "serif", color = "#3b3b3b"),
+    plot.background = element_rect(fill = "#e0e0e0", color = "#e0e0e0"),
+    legend.background = element_rect(fill = "#e0e0e0", color = "#e0e0e0")
+  )
+}
+
 
 ggHist <- function(x, meanX, densX = NULL, nameX = NULL) {
   
@@ -79,12 +88,7 @@ ggHist <- function(x, meanX, densX = NULL, nameX = NULL) {
       labels = c("sample mean", "true mean")
     ) +
     ggtitle(paste("Histogram of", nameX)) +
-    theme(
-      plot.title = element_text(hjust = 0.5),
-      text = element_text(size = 14, family = "serif", color = "#3b3b3b"),
-      plot.background = element_rect(fill = "#e0e0e0", color = "#e0e0e0"),
-      legend.background = element_rect(fill = "#e0e0e0", color = "#e0e0e0")
-    )
+    ggTheme()
   
   if (!is.null(densX)) {
     p <- p + 
@@ -120,7 +124,7 @@ ggConv <- function(x, realParam, var = FALSE) {
     # randomly select k observations and estimate the average.
     if (var) {
       est <- c(est, var(sample(x, k)))
-      type <- "Variance"
+      type <- "Variance of Difference"
     } else {
       est <- c(est, mean(sample(x, k)))
       type <- "Mean Difference"
@@ -142,8 +146,8 @@ ggConv <- function(x, realParam, var = FALSE) {
       alpha = 0.6,
       linewidth = 1.2
     ) +
-    xlab(expression("k")) +
-    ylab("mean difference") +
+    xlab(expression("n")) +
+    ylab("value") +
     scale_color_manual(
       name = "",
       # values = c(estim = "#0000FF", real = "#FF0000"), 
@@ -151,12 +155,7 @@ ggConv <- function(x, realParam, var = FALSE) {
       labels = c("sample", "true")
     ) +
     ggtitle(paste("Convergence of", type)) +
-    theme(
-      plot.title = element_text(hjust = 0.5), 
-      text = element_text(size = 14, family = "serif", color = "#3b3b3b"),
-      plot.background = element_rect(fill = "#e0e0e0", color = "#e0e0e0"),
-      legend.background = element_rect(fill = "#e0e0e0", color = "#e0e0e0")
-    )
+    ggTheme()
   
   return(p)
 }
@@ -175,12 +174,7 @@ ggNorm <- function(x) {
     xlab("theoretical") +
     ylab("empirical") +
     ggtitle("Normal QQ Plot") +
-    theme(
-      plot.title = element_text(hjust = 0.5), 
-      text = element_text(size = 14, family = "serif", color = "#3b3b3b"),
-      plot.background = element_rect(fill = "#e0e0e0", color = "#e0e0e0"),
-      legend.background = element_rect(fill = "#e0e0e0", color = "#e0e0e0")
-    )
+    ggTheme()
   
   return(p)
 }
@@ -272,11 +266,7 @@ ggMDD <- function(x, y, boots) {
         expression(paste(mu, "= 0"))
       )
     ) +
-    theme(
-      text = element_text(size = 14, family = "serif", color = "#3b3b3b"),
-      plot.background = element_rect(fill = "#e0e0e0", color = "#e0e0e0"),
-      legend.background = element_rect(fill = "#e0e0e0", color = "#e0e0e0")
-    )
+    ggTheme()
   
   return(p)
 }

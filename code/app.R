@@ -1,11 +1,3 @@
-# rm(list = ls())
-# 
-# library(shiny)
-# library(ggplot2)
-# library(gridExtra)
-# library(shinybusy)
-# 
-# source("code/aux_functions.R")
 
 ui <- fluidPage(
   withMathJax(),
@@ -65,7 +57,9 @@ ui <- fluidPage(
             "n",
             label = "$$n_X = n_Y$$",
             value = 1000,
-            min = 30
+            min = 50,
+            max = 1e+6,
+            step = 50
           )
         ),
         # Expected value of each distribution
@@ -165,18 +159,17 @@ ui <- fluidPage(
         br(),
         tabPanel(
           "Simulated Samples",
-          uiOutput("estX"),
-          uiOutput("estY"),
+          uiOutput("estVars"),
           plotOutput("hist")
         ),
         tabPanel(
           "Convergence", 
-          uiOutput("estRealDiff"),
-          uiOutput("estSampleDiff"),
+          uiOutput("estDiff"),
           plotOutput("conv")
         ),
         tabPanel(
-          "Bootstrap", 
+          "Bootstrap",
+          uiOutput("shapiroW"),
           plotOutput("boots")
         ),
         tabPanel(
@@ -252,6 +245,7 @@ server <- function(input, output, session) {
       # Bootstrap average difference:
       boots <- bootsAvgDiff(x, y, 1000)
       densBoots <- dnorm(dSeq(boots), mean(boots), sd(boots))
+      swTest <- shapiro.test(boots)
       
       # minimum detectable difference
       mdd <- getMDD(sqrt(realDiffVar), n)
@@ -268,24 +262,23 @@ server <- function(input, output, session) {
         p
       })
       
-      output$estX <- renderUI({
+      output$estVars <- renderUI({
         withMathJax(
-          paste(
-            "$$E(X) =", round(meanX, digits = 2), "; \\quad",
-            "Var(X) =", round(varX, digits = 2), "; \\quad",
-            "\\bar{X} =", round(mean(x), digits = 2), "; \\quad",
-            "{s^2}_X =", round(var(x), digits = 2), "$$"
-          )
-        )
-      })
-      
-      output$estY <- renderUI({
-        withMathJax(
-          paste(
-            "$$E(Y) =", round(meanY, digits = 2), "; \\quad",
-            "Var(Y) =", round(varY, digits = 2), "; \\quad",
-            "\\bar{Y} =", round(mean(y), digits = 2), "; \\quad",
-            "{s^2}_Y =", round(var(y), digits = 2), "$$"
+          helpText(
+            paste(
+              "$$E(X) =", round(meanX, digits = 2), "; \\quad",
+              "Var(X) =", round(varX, digits = 2), "; \\quad",
+              "\\bar{X} =", round(mean(x), digits = 2), "; \\quad",
+              "{s^2}_X =", round(var(x), digits = 2), "$$"
+            )
+          ),
+          helpText(
+            paste(
+              "$$E(Y) =", round(meanY, digits = 2), "; \\quad",
+              "Var(Y) =", round(varY, digits = 2), "; \\quad",
+              "\\bar{Y} =", round(mean(y), digits = 2), "; \\quad",
+              "{s^2}_Y =", round(var(y), digits = 2), "$$"
+            )
           )
         )
       })
@@ -301,6 +294,21 @@ server <- function(input, output, session) {
         p
       })
       
+      output$estDiff <- renderUI({
+        withMathJax(
+          helpText(
+            paste(
+              "$$E(X) - E(Y) =", round(realDiff, digits = 2), "$$"
+            )
+          ),
+          helpText(
+            paste(
+              "$$Var(X - Y) =", round(realDiffVar, digits = 2), "$$"
+            )
+          )
+        )
+      })
+      
       ## bootstrap:
       output$boots <- renderPlot({
         p <- grid.arrange(
@@ -313,20 +321,18 @@ server <- function(input, output, session) {
         p
       })
       
-      output$estRealDiff <- renderUI({
+      output$shapiroW <- renderUI({
         withMathJax(
-          paste(
-            "$$E(X) - E(Y) =", round(realDiff, digits = 2), "; \\quad", 
-            "Var(X - Y) =", round(realDiffVar, digits = 2), "$$"
-          )
-        )
-      })
-      
-      output$estSampleDiff <- renderUI({
-        withMathJax(
-          paste(
-            "$$\\bar{X} - \\bar{Y} =", round(mean(x) - mean(y), digits = 2),"; \\quad", 
-            "{s^2}_{X-Y} =", round(var(x) + var(y), digits = 2), "$$"
+          helpText(
+            paste(
+              "$$ \\mathrm{Shapiro\\mbox{-}Wilk} \\",
+              "W = ", round(swTest$statistic, digits = 2), "$$"
+            )
+          ),
+          helpText(
+            paste(
+              "$$ \\mathrm{p\\mbox{-}value} = ", round(swTest$p.value, digits = 2), "$$"
+            )
           )
         )
       })
@@ -338,8 +344,15 @@ server <- function(input, output, session) {
       
       output$estMDD <- renderUI({
         withMathJax(
-          paste(
-            "$$mdd =", round(mdd, digits = 2), "$$"
+          helpText(
+            paste(
+              "$$\\mathrm{min. \\ detectable \\ diff.} =", round(mdd, digits = 2), "$$"
+            )
+          ),
+          helpText(
+            paste(
+              "$$ n = n_X + n_Y =", 2 * n, "$$"
+            )
           )
         )
       })
@@ -348,5 +361,3 @@ server <- function(input, output, session) {
   )
   
 }
-
-# shinyApp(ui, server,  options = list(width = 1200, height = 580))

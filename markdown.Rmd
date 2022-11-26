@@ -1,0 +1,37 @@
+---
+title: "Random Precision"
+author: "Santiago"
+date: "2022-11-26"
+output: html_document
+runtime: shiny
+---
+
+\usepackage{mathtools}
+
+<style>
+body {
+display: inline-block;
+text-align: justify;
+margin: 0px auto;
+}
+</style>
+
+## What da fuck
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+
+rm(list = ls())
+
+library(shiny)
+library(ggplot2)
+library(gridExtra)
+library(shinybusy)
+
+source("code/aux_functions.R")
+```
+
+```{r app, echo=FALSE}
+source('code/app.R')
+shinyApp(ui, server, options = list(width = 1500, height = 580))
+```

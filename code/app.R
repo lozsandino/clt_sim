@@ -1,10 +1,11 @@
-rm(list = ls())
-
-library(shiny)
-library(ggplot2)
-library(gridExtra)
-
-source("code/aux_functions.R")
+# rm(list = ls())
+# 
+# library(shiny)
+# library(ggplot2)
+# library(gridExtra)
+# library(shinybusy)
+# 
+# source("code/aux_functions.R")
 
 ui <- fluidPage(
   withMathJax(),
@@ -13,6 +14,12 @@ ui <- fluidPage(
     fg = "#3b3b3b",
     base_font = "Computer Modern",
     primary = "#3b3b3b"
+  ),
+  
+  add_loading_state(
+    ".shiny-plot-output",
+    text = "Please wait...",
+    svgColor = "steelblue"
   ),
   
   sidebarLayout(
@@ -342,4 +349,4 @@ server <- function(input, output, session) {
   
 }
 
-shinyApp(ui, server)
+# shinyApp(ui, server,  options = list(width = 1200, height = 580))

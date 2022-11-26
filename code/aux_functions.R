@@ -263,7 +263,7 @@ ggMDD <- function(x, y, boots) {
       values = c(alt = "#702963", nul = "#CD7F32"), 
       labels = c(
         "mdd",
-        expression(paste(mu, "= 0"))
+        "diff. = 0"
       )
     ) +
     ggTheme()

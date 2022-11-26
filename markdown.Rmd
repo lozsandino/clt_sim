@@ -1,7 +1,6 @@
 ---
 title: "Random Precision"
-author: "Santiago"
-date: "2022-11-26"
+author: "Santiago Lozano Sandino"
 output: html_document
 runtime: shiny
 ---
@@ -18,7 +17,6 @@ font-family: Serif
 }
 </style>
 
-## What da fuck
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
@@ -35,5 +33,5 @@ source("code/aux_functions.R")
 
 ```{r app, echo=FALSE}
 source('code/app.R')
-shinyApp(ui, server, options = list(width = 1500, height = 580))
+shinyApp(ui, server, options = list(width = 1500, height = 650))
 ```
